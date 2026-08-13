@@ -14,3 +14,12 @@ export const projectLinks = sqliteTable(
   },
   (table) => [index("idx_project_links_position").on(table.position, table.id)],
 );
+
+export const siteSettings = sqliteTable("site_settings", {
+  id: integer("id").primaryKey(),
+  title: text("title").notNull(),
+  description: text("description").notNull().default(""),
+  thumbnailUrl: text("thumbnail_url").notNull().default(""),
+  faviconUrl: text("favicon_url").notNull().default(""),
+  updatedAt: integer("updated_at").notNull(),
+});

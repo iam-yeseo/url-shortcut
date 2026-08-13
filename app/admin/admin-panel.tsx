@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useState } from "react";
-import type { ProjectLink } from "../types";
+import { DEFAULT_SITE_SETTINGS, type ProjectLink, type SiteSettings } from "../types";
 
 const colors = ["#DDF3C4", "#F8D6C3", "#D8E5FA", "#F5E2A8", "#E4D7F8"];
 
@@ -25,6 +25,10 @@ export function AdminPanel() {
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const [error, setError] = useState("");
   const [color, setColor] = useState(colors[0]);
+  const [settings, setSettings] = useState<SiteSettings>(DEFAULT_SITE_SETTINGS);
+  const [settingsSaving, setSettingsSaving] = useState(false);
+  const [settingsError, setSettingsError] = useState("");
+  const [settingsNotice, setSettingsNotice] = useState("");
 
   useEffect(() => {
     let active = true;
@@ -47,10 +51,46 @@ export function AdminPanel() {
         if (active) setLoading(false);
       });
 
+    fetch("/api/settings", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        return (await response.json()) as { settings: SiteSettings };
+      })
+      .then((data) => {
+        if (active) setSettings(data.settings);
+      })
+      .catch(() => {
+        if (active) setSettingsError("사이트 정보를 불러오지 못했어요.");
+      });
+
     return () => {
       active = false;
     };
   }, []);
+
+  async function saveSettings(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    setSettingsSaving(true);
+    setSettingsError("");
+    setSettingsNotice("");
+
+    try {
+      const response = await fetch("/api/settings", {
+        method: "PUT",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(settings),
+      });
+      const data = (await response.json()) as { settings?: SiteSettings; error?: string };
+      if (!response.ok || !data.settings) throw new Error(data.error || "사이트 정보를 저장하지 못했어요.");
+
+      setSettings(data.settings);
+      setSettingsNotice("사이트 정보를 저장했어요. 공개 페이지를 새로 열면 바로 반영돼요.");
+    } catch (caught) {
+      setSettingsError(caught instanceof Error ? caught.message : "사이트 정보를 저장하지 못했어요.");
+    } finally {
+      setSettingsSaving(false);
+    }
+  }
 
   async function addLink(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -112,10 +152,77 @@ export function AdminPanel() {
         </header>
 
         <div className="admin-heading">
-          <p>LINK MANAGER</p>
-          <h1>프로젝트 링크 관리</h1>
-          <span>새로운 작업을 추가하거나 더 이상<br />보여주지 않을 링크를 정리할 수 있어요.</span>
+          <p>SITE MANAGER</p>
+          <h1>플레이그라운드 관리</h1>
+          <span>사이트 정보와 프로젝트 링크를<br />한곳에서 관리할 수 있어요.</span>
         </div>
+
+        <section className="admin-card settings-card" aria-labelledby="site-settings-title">
+          <div className="section-heading">
+            <div>
+              <p>BRAND &amp; SHARE</p>
+              <h2 id="site-settings-title">사이트 정보</h2>
+            </div>
+            <span>탭 · 공유 미리보기</span>
+          </div>
+
+          <form className="admin-form" onSubmit={saveSettings}>
+            <div className="field">
+              <label htmlFor="site-title">웹 제목 *</label>
+              <input
+                id="site-title"
+                required
+                maxLength={70}
+                value={settings.title}
+                onChange={(event) => setSettings((current) => ({ ...current, title: event.target.value }))}
+                placeholder="YESEO'S PLAYGROUND"
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="site-description">웹 설명</label>
+              <textarea
+                id="site-description"
+                maxLength={180}
+                value={settings.description}
+                onChange={(event) => setSettings((current) => ({ ...current, description: event.target.value }))}
+                placeholder="공유할 때 함께 보일 짧은 설명을 입력해주세요."
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="thumbnail-url">공유 썸네일 주소</label>
+              <input
+                id="thumbnail-url"
+                type="text"
+                inputMode="url"
+                value={settings.thumbnailUrl}
+                onChange={(event) => setSettings((current) => ({ ...current, thumbnailUrl: event.target.value }))}
+                placeholder="https://... 또는 /og.png"
+              />
+              <small className="field-help">카카오톡이나 SNS에서 보일 공개 이미지 주소를 입력해주세요.</small>
+            </div>
+
+            <div className="field">
+              <label htmlFor="favicon-url">파비콘 주소</label>
+              <input
+                id="favicon-url"
+                type="text"
+                inputMode="url"
+                value={settings.faviconUrl}
+                onChange={(event) => setSettings((current) => ({ ...current, faviconUrl: event.target.value }))}
+                placeholder="https://... 또는 비워두기"
+              />
+              <small className="field-help">PNG 또는 ICO 이미지 주소를 권장해요. 비워두면 파비콘을 사용하지 않아요.</small>
+            </div>
+
+            {settingsError && <p className="form-error" role="alert">{settingsError}</p>}
+            {settingsNotice && <p className="form-success" role="status">{settingsNotice}</p>}
+            <button className="submit-button" type="submit" disabled={settingsSaving}>
+              {settingsSaving ? "저장하는 중..." : "사이트 정보 저장하기"}
+            </button>
+          </form>
+        </section>
 
         <section className="admin-card" aria-labelledby="add-link-title">
           <h2 id="add-link-title">새 링크 추가</h2>
@@ -196,7 +303,7 @@ export function AdminPanel() {
           </div>
         </section>
 
-        <p className="admin-note">현재는 기본 관리 틀입니다. 실제 공개 운영 전에는<br />관리자 로그인 보호 기능을 추가하는 것을 권장해요.</p>
+        <p className="admin-note">이 페이지의 주소를 아는 사람은 내용을 변경할 수 있어요.<br />공개 운영 전에는 관리자 로그인 보호 기능을 추가하는 것을 권장해요.</p>
       </section>
     </main>
   );

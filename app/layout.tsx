@@ -1,6 +1,17 @@
 import type { Metadata, Viewport } from "next";
 import { headers } from "next/headers";
+import { DEFAULT_SITE_SETTINGS } from "./types";
 import "./globals.css";
+
+function resolveAssetUrl(value: string, baseUrl: URL) {
+  if (!value) return undefined;
+
+  try {
+    return new URL(value, baseUrl).toString();
+  } catch {
+    return undefined;
+  }
+}
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
@@ -8,27 +19,27 @@ export async function generateMetadata(): Promise<Metadata> {
   const forwardedProtocol = requestHeaders.get("x-forwarded-proto");
   const protocol = forwardedProtocol ?? (host.startsWith("localhost") ? "http" : "https");
   const baseUrl = new URL(`${protocol}://${host}`);
-  const imageUrl = new URL("/og.png", baseUrl).toString();
+  const imageUrl = resolveAssetUrl(DEFAULT_SITE_SETTINGS.thumbnailUrl, baseUrl);
 
   return {
     metadataBase: baseUrl,
     title: {
-      default: "Vibe Archive",
-      template: "%s · Vibe Archive",
+      default: DEFAULT_SITE_SETTINGS.title,
+      template: `%s · ${DEFAULT_SITE_SETTINGS.title}`,
     },
-    description: "그동안 만든 바이브코딩 프로젝트를 한곳에 모은 링크 아카이브입니다.",
+    description: DEFAULT_SITE_SETTINGS.description,
     openGraph: {
       type: "website",
       locale: "ko_KR",
-      title: "바이브로 만든 작은 세계들",
-      description: "그동안 만든 바이브코딩 프로젝트를 한곳에서 만나보세요.",
-      images: [{ url: imageUrl, width: 1200, height: 630, alt: "바이브 아카이브" }],
+      title: DEFAULT_SITE_SETTINGS.title,
+      description: DEFAULT_SITE_SETTINGS.description,
+      images: imageUrl ? [{ url: imageUrl, alt: `${DEFAULT_SITE_SETTINGS.title} 썸네일` }] : undefined,
     },
     twitter: {
-      card: "summary_large_image",
-      title: "바이브로 만든 작은 세계들",
-      description: "그동안 만든 바이브코딩 프로젝트를 한곳에서 만나보세요.",
-      images: [imageUrl],
+      card: imageUrl ? "summary_large_image" : "summary",
+      title: DEFAULT_SITE_SETTINGS.title,
+      description: DEFAULT_SITE_SETTINGS.description,
+      images: imageUrl ? [imageUrl] : undefined,
     },
   };
 }

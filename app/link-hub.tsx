@@ -1,8 +1,7 @@
 "use client";
 
-import Link from "next/link";
 import { useEffect, useState } from "react";
-import type { ProjectLink } from "./types";
+import type { ProjectLink, SiteSettings } from "./types";
 
 function ArrowUpRight() {
   return (
@@ -23,8 +22,9 @@ function ShareIcon() {
   );
 }
 
-export function LinkHub() {
+export function LinkHub({ initialSettings }: { initialSettings: SiteSettings }) {
   const [links, setLinks] = useState<ProjectLink[]>([]);
+  const [settings, setSettings] = useState(initialSettings);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -47,15 +47,43 @@ export function LinkHub() {
         if (active) setLoading(false);
       });
 
+    fetch("/api/settings", { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) throw new Error();
+        return (await response.json()) as { settings: SiteSettings };
+      })
+      .then((data) => {
+        if (active) setSettings(data.settings);
+      })
+      .catch(() => undefined);
+
     return () => {
       active = false;
     };
   }, []);
 
+  useEffect(() => {
+    document.title = settings.title;
+
+    const description = document.querySelector<HTMLMetaElement>('meta[name="description"]');
+    description?.setAttribute("content", settings.description);
+
+    const currentIcon = document.querySelector<HTMLLinkElement>('link[rel~="icon"]');
+    if (!settings.faviconUrl) {
+      currentIcon?.remove();
+      return;
+    }
+
+    const icon = currentIcon ?? document.createElement("link");
+    icon.rel = "icon";
+    icon.href = settings.faviconUrl;
+    if (!currentIcon) document.head.append(icon);
+  }, [settings]);
+
   async function sharePage() {
     const shareData = {
-      title: "Vibe Archive",
-      text: "그동안 만든 바이브코딩 프로젝트를 모아뒀어요.",
+      title: settings.title,
+      text: settings.description,
       url: window.location.href,
     };
 
@@ -71,21 +99,16 @@ export function LinkHub() {
 
   return (
     <main className="page-stage">
-      <section className="mobile-shell public-shell" aria-label="바이브코딩 링크 모음">
+      <section className="mobile-shell public-shell" aria-label={`${settings.title} 링크 모음`}>
         <div className="ambient ambient-one" />
         <div className="ambient ambient-two" />
 
         <header className="profile-header">
           <div className="profile-topbar">
-            <span className="tiny-brand">VIBE ARCHIVE</span>
+            <span className="tiny-brand">{settings.title}</span>
             <button className="circle-button" type="button" onClick={sharePage} aria-label="페이지 공유하기">
               <ShareIcon />
             </button>
-          </div>
-
-          <div className="profile-avatar" aria-hidden="true">
-            <span>Y</span>
-            <i />
           </div>
         </header>
 
@@ -133,7 +156,6 @@ export function LinkHub() {
 
         <footer className="public-footer">
           <p>Made with curiosity &amp; a little bit of code.</p>
-          <Link href="/admin" aria-label="관리자 페이지로 이동">관리</Link>
         </footer>
 
         {copied && <div className="toast" role="status">링크를 복사했어요</div>}

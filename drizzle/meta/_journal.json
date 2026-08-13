@@ -15,6 +15,13 @@
       "when": 1786580892539,
       "tag": "0001_sharp_captain_stacy",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1786583838930,
+      "tag": "0002_neat_siren",
+      "breakpoints": true
     }
   ]
 }

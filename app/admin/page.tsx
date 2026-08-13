@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { AdminPanel } from "./admin-panel";
 
 export const metadata: Metadata = {
-  title: "링크 관리",
+  title: "플레이그라운드 관리",
   robots: { index: false, follow: false },
 };
 

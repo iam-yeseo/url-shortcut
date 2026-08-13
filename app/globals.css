@@ -127,41 +127,13 @@ a {
   stroke-linejoin: round;
 }
 
-.profile-avatar {
-  position: relative;
-  width: 82px;
-  height: 82px;
-  margin: 25px 0 20px;
-  display: grid;
-  place-items: center;
-  border: 4px solid rgba(255, 255, 255, 0.9);
-  border-radius: 27px;
-  color: #fff;
-  background: linear-gradient(145deg, #1a4939, #7a9670);
-  box-shadow: 0 12px 30px rgba(35, 74, 58, 0.2);
-  transform: rotate(-3deg);
-}
-
-.profile-avatar span {
-  font-family: Georgia, serif;
-  font-size: 39px;
-  font-style: italic;
-}
-
-.profile-avatar i {
-  position: absolute;
-  right: -6px;
-  bottom: -4px;
-  width: 23px;
-  height: 23px;
-  border: 4px solid var(--paper);
-  border-radius: 50%;
-  background: var(--lime);
-}
-
 .project-list {
   display: grid;
   gap: 11px;
+}
+
+.public-shell .project-list {
+  margin-top: 22px;
 }
 
 .project-card {
@@ -278,19 +250,12 @@ a {
   padding: 29px 2px 0;
   display: flex;
   align-items: center;
-  justify-content: space-between;
   color: #898c84;
   font-size: 10px;
 }
 
 .public-footer p {
   margin: 0;
-}
-
-.public-footer a {
-  color: inherit;
-  text-decoration: none;
-  opacity: 0.72;
 }
 
 .toast {
@@ -383,6 +348,31 @@ a {
   border-radius: 24px;
   background: #fff;
   box-shadow: 0 9px 28px rgba(47, 51, 43, 0.05);
+}
+
+.settings-card {
+  margin-bottom: 14px;
+}
+
+.section-heading {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.section-heading p {
+  margin: 0 0 5px;
+  color: #5b7166;
+  font-size: 9px;
+  font-weight: 850;
+  letter-spacing: 0.12em;
+}
+
+.section-heading > span {
+  color: var(--muted);
+  font-size: 9px;
+  white-space: nowrap;
 }
 
 .admin-card h2,
@@ -515,6 +505,19 @@ a {
   margin: 0;
   color: #b64b4b;
   font-size: 11px;
+}
+
+.form-success {
+  margin: 0;
+  color: #35735a;
+  font-size: 11px;
+  line-height: 1.45;
+}
+
+.field-help {
+  color: #858980;
+  font-size: 9px;
+  line-height: 1.45;
 }
 
 .saved-section {
