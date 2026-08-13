@@ -18,8 +18,9 @@ test("server-renders the public link hub", async () => {
   assert.equal(response.status, 200);
   const html = await response.text();
   assert.match(html, /<title>Vibe Archive<\/title>/i);
-  assert.match(html, /바이브로 만든/);
-  assert.match(html, /작은 세계들/);
+  assert.match(html, /VIBE ARCHIVE/);
+  assert.doesNotMatch(html, /<h1[\s>]/i);
+  assert.doesNotMatch(html, /떠오른 아이디어를 일단 만들어본 기록/);
   assert.doesNotMatch(html, /codex-preview|react-loading-skeleton/i);
 });
 

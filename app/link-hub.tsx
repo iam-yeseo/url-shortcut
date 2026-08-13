@@ -87,11 +87,6 @@ export function LinkHub() {
             <span>Y</span>
             <i />
           </div>
-          <p className="eyebrow">YESEO&apos;S PLAYGROUND</p>
-          <h1>바이브로 만든<br />작은 세계들</h1>
-          <p className="profile-copy">
-            떠오른 아이디어를 일단 만들어본 기록.<br />마음에 드는 프로젝트를 눌러 구경해보세요.
-          </p>
         </header>
 
         <div className="project-list" aria-live="polite">
