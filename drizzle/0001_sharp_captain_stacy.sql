@@ -1,0 +1,1 @@
+CREATE INDEX `idx_project_links_position` ON `project_links` (`position`,`id`);
