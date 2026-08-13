@@ -35,8 +35,7 @@ export async function ensureSiteSettingsTable(d1: D1Database) {
 }
 
 export async function getSiteSettings(d1: D1Database): Promise<SiteSettings> {
-  await ensureSiteSettingsTable(d1);
-  const settings = await d1.prepare(`SELECT
+  const query = () => d1.prepare(`SELECT
       title,
       description,
       thumbnail_url,
@@ -46,6 +45,14 @@ export async function getSiteSettings(d1: D1Database): Promise<SiteSettings> {
     WHERE id = ?`)
     .bind(SETTINGS_ID)
     .first<SiteSettingsRow>();
+
+  let settings: SiteSettingsRow | null;
+  try {
+    settings = await query();
+  } catch {
+    await ensureSiteSettingsTable(d1);
+    settings = await query();
+  }
 
   if (!settings) return DEFAULT_SITE_SETTINGS;
   return {
